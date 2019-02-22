@@ -1806,9 +1806,10 @@ var CFFCustomEncoding = new r.VersionedStruct(new CFFEncodingVersion(), {
   1: {
     nRanges: r.uint8,
     ranges: new r.Array(Range1, 'nRanges')
+  }
 
-    // TODO: supplement?
-  } });
+  // TODO: supplement?
+});
 
 var CFFEncoding = new PredefinedOp([StandardEncoding, ExpertEncoding], new CFFPointer(CFFCustomEncoding, { lazy: true }));
 
@@ -3759,8 +3760,11 @@ Directory.preEncode = function (stream) {
   this.numTables = tables$$.length;
   this.tables = tables$$;
 
-  this.searchRange = Math.floor(Math.log(this.numTables) / Math.LN2) * 16;
-  this.entrySelector = Math.floor(this.searchRange / Math.LN2);
+  var maxExponentFor2 = Math.floor(Math.log(this.numTables) / Math.LN2);
+  var maxPowerOf2 = Math.pow(2, maxExponentFor2);
+
+  this.searchRange = maxPowerOf2 * 16;
+  this.entrySelector = Math.log(maxPowerOf2) / Math.LN2;
   this.rangeShift = this.numTables * 16 - this.searchRange;
 };
 
@@ -13552,7 +13556,7 @@ var CFFSubset = function (_Subset) {
     var top = {
       version: 1,
       hdrSize: this.cff.hdrSize,
-      offSize: this.cff.length,
+      offSize: 4,
       header: this.cff.header,
       nameIndex: [this.cff.postscriptName],
       topDictIndex: [topDict],
